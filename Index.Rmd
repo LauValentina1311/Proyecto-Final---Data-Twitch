@@ -2,5 +2,24 @@
 title: "Análisis comparativo del rendimiento de los streamers de Twitch"
 author: "Laurys Alvarez y Angel Reina"
 date: "2025-10-01"
-output: html_document
+output: 
+  html_document:
+  toc: true
+  toc_float: true
+  code_folding: hide
+  theme: cerulean
 ---
+
+```{r library, include=FALSE}
+# Descargamos las librerías a utilizar
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(DT)
+library(tidyr)
+```
+
+```{r export, include=FALSE}
+# Exportamos la data de Twitch, que es .csv
+twitch_data <- read.csv("twitch_streamers.csv")
+```
