@@ -1,0 +1,6 @@
+---
+title: "Análisis comparativo del rendimiento de los streamers de Twitch"
+author: "Laurys Alvarez y Angel Reina"
+date: "2025-10-01"
+output: html_document
+---
