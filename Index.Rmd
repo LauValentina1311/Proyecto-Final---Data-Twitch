@@ -1,13 +1,13 @@
 ---
 title: "Análisis comparativo del rendimiento de los streamers de Twitch"
-author: "Laurys Alvarez y Angel Reina"
+author: "Laurys Alvarez"
 date: "2025-10-01"
 output: 
   html_document:
-  toc: true
-  toc_float: true
-  code_folding: hide
-  theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: cerulean
 ---
 
 ```{r library, include=FALSE}
@@ -20,8 +20,8 @@ library(tidyr)
 ```
 
 ```{r export, include=FALSE}
-# Exportamos la data de Twitch, que es .csv
-twitch_data <- read.csv("twitch_streamers.csv")
+# Exportamos la data de Twitch, que es .csv, y aclaramos que los espacios vacíos serán llamados NA
+twitch_data <- read.csv("twitch_streamers.csv", na.strings = "")
 ```
 
 # Planteamiento de la Investigación
@@ -42,10 +42,53 @@ Comparar el comportamiento de las categorías de contenido de los streamers de h
 
 2.  Definir el top 5 de los streamers de habla angoparlante más populares en seguidores, views, dentro de las categorías de contenido más concurridas.
 
-3.  Definir el top 5 de los streamers de habla hispanohablante más populares en seguidores, views, dentro de las categorías de contenido más concurridas.
+3. Definir el top 5 de los streamers de habla hispanohablante más populares en seguidores, views, dentro de las categorías de contenido más concurridas.
 
-# Marco Teórico 
+# Marco de Referencia
+
+## 4. Marco Teórico 
 
 Este estudio está basado en Twitch, la plataforma de Streaming más concurrida en esta era a nivel mundial. Sus inicios en 2011 como una rama de Justin.tv,  para retransmitir contenido en vivo. Debido a la enorme popularidad de la sección de videojuegos en Justin.tv, decidieron crear Twitch.tv como una plataforma dedicada exclusivamente a los eSports y videojuegos, lanzándose oficialmente el 6 de junio de 2011.  La plataforma creció rapidamente, volviendose la más popular en la categoría de Videojuegos, con el tiempo, evolucionó a otras categorías, como Just Chatting, IRL (in real life, streams en la calle), conciertos, deportes. 
 
-En esta investigación, nos apoyamos en la Estadística Descriptiva para obtener los resumenes y tener los datos en orden. Con esto, podemos
+En esta investigación, nos apoyamos en la Estadística Descriptiva para obtener los resumenes y tener los datos en orden. Con esto, podemos presentar las características principales de los datos (medias, máximos y distribuciones de frecuencia), permitiendo así comparar la distribución de las preferencias y el comportamiento de los oyentes entre ambas comunidades, identificando los patrones específicos de consumo y popularidad.
+
+## 5. Marco Metodológico
+
+### 5.1 Enfoque y Tipo de Investigación
+
+La investigación es de naturaleza Cuantitativa de tipo descriptivo con un énfasis comparativo. Se busca recopilar y analizar datos númericos de Twitch para describir el comportamiento de cada variable y comparar los resultados entre sí. 
+
+### 5.2 Fuente de datos 
+
+La fuente de datos a utilizar es `twitch_streamers.csv`, y las variables más importantes para esta investigación son `NAME`, `LANGUAGE`, `MOST_STREAMED_GAME`, `AVG_VIEWERS_PER_sTREAM`, `TOTAL_FOLLOWERS`, ...
+
+### 5.3 Procesamiento y Análisis de Datos
+
+El lenguaje a utilizar es R, con sus librerias dpylr, ggplot2 y DT para la creación de tablas ordenadas. Este análisis cuenta con, 1. Limpieza de Datos: Carga del data frame, analizar los valores errados o inexistentes y la corrección de este tipo de datos. 2.
+
+```{r clean_data, include=TRUE}
+
+# Verificamos el total de NA en nuestra data
+sum(is.na(twitch_data))
+
+# Sustuimos los valores NA por la moda de los demás valores de esa fila
+
+# Con esta función se encuentra la moda de una columna
+moda_streamed_game <- function(v){
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]}
+
+# Encontramos la moda de la columna X2ND_MOST_STREAMED_GAME
+moda_streamed_game_2 <- moda_streamed_game(twitch_data$X2ND_MOST_STREAMED_GAME)
+
+# Reemplazamos los valores NA por la moda encontrada
+data_limpia <- twitch_data %>%
+  replace_na(list(X2ND_MOST_STREAMED_GAME = moda_streamed_game_2))
+```
+
+
+```{r see, include=TRUE}
+
+```
+
+
