@@ -7,9 +7,10 @@ output:
     toc: true
     toc_float: true
     code_folding: hide
-    theme: cerulean
----
+    theme: flatly
+    highlight: tango
 
+---
 ```{r library, include=FALSE}
 # Descargamos las librerías a utilizar
 library(dplyr)
@@ -17,6 +18,15 @@ library(ggplot2)
 library(knitr)
 library(DT)
 library(tidyr)
+library(plotly)
+library(scales)
+```
+
+```{r asignar paletas, include=FALSE}
+# Asignamos paletas de colores a utilizar, inspiradas en videojuegos
+palette_twitch <- c("#6441a5","#7f61bc","#a690dd", "#b9baff","#F0F0F0","#000000")
+palette_colours <- c("#6441a5", "#26C6DA", "#FF1493", "#FAFF00", "#5DFF00")
+palette_gamebase <- c("#FFB800", "#004D99", "#008040", "#CC0000", "#8000FF", "#B85C00")
 ```
 
 ```{r export, include=FALSE}
@@ -32,11 +42,13 @@ Una de las plataformas de streaming más concurridas y famosas actualmente es Tw
 
 El problema en nuestro estudio se centra en la falta de comparativa entre dos de las comunidades más importantes en Twitch, la angloparlante (Inglés) y la hispanohablante (Español), y es importante para llegar a conclusiones en el tema de popularidad, y visualizar el comportamiento de los oyentes identificar a los streamers, contenido y juegos más famosos y concurridos por región.
 
-## 2. Objetivo General
+## 2. Objetivos 
+
+## 2.1 Objetivo General
 
 Comparar el comportamiento de las categorías de contenido de los streamers de habla angoparlante (Inglés) y hispanohablante (Español), para determinar y diferenciar las preferencias y/o comportamientos de los oyentes.
 
-## 3. Objetivos Específicos
+## 2.2 Objetivos Específicos
 
 1.  Limpiar el data frame .csv, inspeccionar las columnas para identificar los valores nulos o vacíos para garantizar unos resultados precisos y correctos.
 
@@ -44,35 +56,37 @@ Comparar el comportamiento de las categorías de contenido de los streamers de h
 
 3. Definir el top 5 de los streamers de habla hispanohablante más populares en seguidores, views, dentro de las categorías de contenido más concurridas.
 
+4. Comparar los resultados obtenidos entre ambas comunidades para identificar las diferencias y similitudes en el comportamiento de los oyentes.
+
+
 # Marco de Referencia
 
-## 4. Marco Teórico 
+## 3. Marco Teórico 
 
 Este estudio está basado en Twitch, la plataforma de Streaming más concurrida en esta era a nivel mundial. Sus inicios en 2011 como una rama de Justin.tv,  para retransmitir contenido en vivo. Debido a la enorme popularidad de la sección de videojuegos en Justin.tv, decidieron crear Twitch.tv como una plataforma dedicada exclusivamente a los eSports y videojuegos, lanzándose oficialmente el 6 de junio de 2011.  La plataforma creció rapidamente, volviendose la más popular en la categoría de Videojuegos, con el tiempo, evolucionó a otras categorías, como Just Chatting, IRL (in real life, streams en la calle), conciertos, deportes. 
 
 En esta investigación, nos apoyamos en la Estadística Descriptiva para obtener los resumenes y tener los datos en orden. Con esto, podemos presentar las características principales de los datos (medias, máximos y distribuciones de frecuencia), permitiendo así comparar la distribución de las preferencias y el comportamiento de los oyentes entre ambas comunidades, identificando los patrones específicos de consumo y popularidad.
 
-## 5. Marco Metodológico
+## 4. Marco Metodológico
 
-### 5.1 Enfoque y Tipo de Investigación
+### 4.1 Enfoque y Tipo de Investigación
 
 La investigación es de naturaleza Cuantitativa de tipo descriptivo con un énfasis comparativo. Se busca recopilar y analizar datos númericos de Twitch para describir el comportamiento de cada variable y comparar los resultados entre sí. 
 
-### 5.2 Fuente de datos 
+### 4.2 Fuente de datos 
 
 La fuente de datos a utilizar es `twitch_streamers.csv`, y las variables más importantes para esta investigación son `NAME`, `LANGUAGE`, `MOST_STREAMED_GAME`, `AVG_VIEWERS_PER_sTREAM`, `TOTAL_FOLLOWERS`, ...
 
-### 5.3 Procesamiento y Análisis de Datos
+### 4.3 Procesamiento y Análisis de Datos
 
-El lenguaje a utilizar es R, con sus librerias dpylr, ggplot2 y DT para la creación de tablas ordenadas. Este análisis cuenta con, 1. Limpieza de Datos: Carga del data frame, analizar los valores errados o inexistentes y la corrección de este tipo de datos. 2.
+El lenguaje a utilizar es R, con sus librerias dpylr, ggplot2 y DT para la creación de tablas ordenadas. Este análisis cuenta con,
+**1. Limpieza de Datos:** Carga del data frame, analizar los valores errados o inexistentes y la corrección de este tipo de datos. 
+**2. Análisis descriptivo:** Cálculo de medidas estadísticas (medias, medianas, modas, máximos, mínimos) y creación de tablas y gráficos para visualizar los datos.
+**3. Comparativa:** Comparar los resultados obtenidos entre las dos comunidades (inglés y español) para identificar diferencias y similitudes en el comportamiento de los oyentes.
 
+### 4.4 Limpieza de Datos
 ```{r clean_data, include=TRUE}
-
-# Verificamos el total de NA en nuestra data
-sum(is.na(twitch_data))
-
 # Sustuimos los valores NA por la moda de los demás valores de esa fila
-
 # Con esta función se encuentra la moda de una columna
 moda_streamed_game <- function(v){
   uniqv <- unique(v)
@@ -86,9 +100,150 @@ data_limpia <- twitch_data %>%
   replace_na(list(X2ND_MOST_STREAMED_GAME = moda_streamed_game_2))
 ```
 
+**Explicación:** Aquí, utilizamos la función `replace_na` para reemplazar los valores NA en la columna `X2ND_MOST_STREAMED_GAME` con la moda de esa columna. La función `moda_streamed_game` calcula la moda de una columna dada. Luego, aplicamos esta función para encontrar la moda de `X2ND_MOST_STREAMED_GAME`.
 
-```{r see, include=TRUE}
+# Análisis de los Resultados
 
+## 5. Análisis General de los Streamers
+
+```{r analisis_streamers}
+streamers <- data_limpia %>%
+  group_by(LANGUAGE) %>%
+  count() %>%
+ arrange(desc(n)) 
+datatable(streamers,
+          class = 'display cell-border stripe hover', 
+          options = list(searching = FALSE),
+          caption = 'Tabla 1: Conteo de Streamers por Región')
 ```
+
+```{r analisis_categorias}
+plotly_grafico1 <- ggplot(streamers, aes(x = reorder(LANGUAGE, n), y = n)) +
+       geom_bar(stat="identity", fill = palette_colours[1]) +
+       coord_flip() +
+   labs(title = "Distribución de Streamers por Región",
+        x = "Región",
+        y = "Número de Streamers") +
+  theme_minimal() 
+ggplotly(plotly_grafico1, tooltip = "text")
+```
+
+**Análisis:** En la Tabla 1, podemos observar que la distribución del top 1000 streamers en Twitch son de **habla angloparlante (Inglés)*** con un total de 401 streamers, mientras que los de habla hispanohablante (Español) son 106. Esto indica una mayor presencia y actividad de streamers angloparlantes, aunque, el español se posiciona como la **tercera lengua más popular** después del Ruso (115 streamers). Esta clara diferencia sugiere un alto dominio del inglés como idioma principal para la creación de contenido en esta plataforma.
+
+## 6. Distribución de Categorías de Contenido por Región/Streamers
+
+### 6.1 Top streamers por followers y región
+
+Determinamos cuáles son los streamers con más followers por región, filtramos por las dos regiones a analizar (Angloparlante e Hispanohablante).
+
+```{r categorias_region, include=FALSE}
+followers_region <- data_limpia %>%
+  filter(LANGUAGE %in% c("English", "Spanish")) %>%
+  group_by(LANGUAGE, NAME) %>%
+  summarise(TOTAL_FOLLOWERS = sum(TOTAL_FOLLOWERS, na.rm = TRUE)) %>%
+  arrange(LANGUAGE, desc(TOTAL_FOLLOWERS)) %>%
+  slice_head(n = 5) %>%
+  ungroup()
+datatable(followers_region,
+          class = 'display cell-border stripe hover', 
+          options = list(searching = FALSE),
+          caption = 'Tabla 2: Top 5 Streamers por Followers y Region') %>%
+  formatCurrency('TOTAL_FOLLOWERS', currency = '', digits = 0)
+```
+
+```{r grafico_followers_region}
+plotly_grafico2 <- ggplot(followers_region, aes(x = reorder(NAME, TOTAL_FOLLOWERS), y = TOTAL_FOLLOWERS, fill = LANGUAGE)) +
+  geom_bar(stat="identity", position = "dodge") +
+  scale_y_continuous(labels = label_comma()) +
+  coord_flip() +
+  labs(title = "Top 5 Streamers por Followers y Región",
+       x = "Streamer",
+       y = "Total de Followers") +
+  scale_fill_manual(values = palette_colours) +
+  theme_minimal()
+ggplotly(plotly_grafico2, tooltip = "text")
+```
+
+**Análisis:** En la Tabla 2, observamos que el streamer con **más seguidores en la comunidad angloparlante es ninja, con un total de 19,000,000 seguidores.** Le sigue **Auronplay, en la comunidad hispanohablante con 16,300,000 seguidores.** La presencia de otros streamers como Rubius y Ibai en el top 5 hispanohablante indica una fuerte competencia y diversidad en esta región. pipipip
+
+### 6.2 Top streamers por views y región
+Determinamos cuáles son los streamers con más views por región.
+
+```{r views_region, include=FALSE}
+views_region <- data_limpia %>%
+  filter(LANGUAGE %in% c("English", "Spanish")) %>%
+  group_by(LANGUAGE, NAME) %>%
+  summarise(TOTAL_VIEWS = mean(TOTAL_VIEWS, na.rm = TRUE)) %>%
+  arrange(LANGUAGE, desc(TOTAL_VIEWS)) %>%
+  slice_head(n = 5) %>%
+  ungroup() 
+datatable(views_region,
+          class = 'display cell-border stripe hover', 
+          options = list(searching = FALSE),
+          caption = 'Tabla 3: Top 5 Streamers por Views y Region') %>%
+  formatCurrency('TOTAL_VIEWS', currency = '', digits = 0)
+```
+
+```{r grafico_views_region}
+plotly_grafico3 <- ggplot(views_region, aes(x = reorder(NAME, TOTAL_VIEWS), y = TOTAL_VIEWS, fill = LANGUAGE)) +
+  geom_bar(stat="identity", position = "dodge") +
+  scale_y_continuous(labels = label_comma()) +
+  coord_flip() +
+  labs(title = "Top 5 Streamers por Views y Región",
+       x = "Streamer",
+       y = "Total de Views") +
+  scale_fill_manual(values = palette_colours) +
+  theme_minimal()
+ggplotly(plotly_grafico3, tooltip = "text")
+```
+
+**Análisis:** En la Tabla 3, se observa que el streamer con **más views de la comunidad angloparlante es ninja, con un total de 572,000,000 views.** Le sigue **Ibai, de la comunidad hispanohablante con 359,000,000 views.** Como podemos observar, si relacionamos los **Followers** y las **Views**, Ninja sigue siendo el streamer con mayor receptividad.
+Mientras que, los streamers Hispanohablantes cuentan con menor cantidad de views en comparación con los angloparlantes, pero aún así, tienen una presencia significativa en la plataforma.
+
+### 6.3 Top streamers por el juego más streameado y región
+Determinamos cuál es el top 5 de streamers con más seguidores por el juego más streameado y región.
+
+```{r juego_region, include=FALSE}
+juego_region <- data_limpia %>%
+  filter(LANGUAGE %in% c("English", "Spanish")) %>%
+  group_by(LANGUAGE) %>%
+  arrange(desc(TOTAL_FOLLOWERS)) %>%
+  mutate(RANK_POR_IDIOMA = row_number()) %>%
+  filter(RANK_POR_IDIOMA <= 5) %>%
+  ungroup() %>%
+  arrange(LANGUAGE, desc(TOTAL_FOLLOWERS)) %>%
+  select(
+    RANK_POR_IDIOMA, 
+    LANGUAGE, 
+    NAME, 
+    MOST_STREAMED_GAME, 
+    TOTAL_FOLLOWERS)
+datatable(juego_region,
+          class = 'display cell-border stripe hover', 
+          options = list(searching = FALSE, pageLength = 10), 
+          caption = 'Tabla 4: Top 5 Streamers por juego más stremeado') %>%
+  formatCurrency('TOTAL_FOLLOWERS', currency = '', digits = 0)
+```
+
+
+```{r grafico_juego_region}
+plotly_grafico4 <- ggplot(juego_region, aes(x = reorder(NAME, TOTAL_FOLLOWERS), y = TOTAL_FOLLOWERS, fill = MOST_STREAMED_GAME)) +
+  geom_bar(stat="identity", position = "dodge") +
+  scale_y_continuous(labels = label_comma()) +
+  coord_flip() +
+  labs(title = "Top 5 Streamers por Juego Más Streameado y Región",
+       x = "VideoJuegos",
+       y = "Total de Followers") +
+  scale_fill_manual(values = palette_colours) +
+  theme_minimal()
+ggplotly(plotly_grafico4, tooltip = "text")
+```
+**Análisis:** En la Tabla 4, se observa que en la comunidad angloparlante, los juegos más streameados por los top 5 streamers son **Fortnite, Overwatch y Just Chatting.** Mientras que en la comunidad hispanohablante, los juegos más populares entre los top 5 streamers son **Just Chatting y Minecraft.** Esto indica una clara diferencia en las preferencias de contenido entre ambas comunidades, con una mayor inclinación hacia juegos específicos en cada región. Aunque, podemos observar que **Just Chatting** es el juego más popular en general en las 2 comunidades, esto podemos decir que es gracias a que es una forma de hablar libremente con sus seguidores.
+
+
+
+
+
+
 
 
