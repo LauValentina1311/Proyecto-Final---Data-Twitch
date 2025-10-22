@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
-#Configuración de la Página de Streamlit 
+#Configuración de la Página de Streamlit
 st.set_page_config(
     page_title="Dashboard de Streamers de Twitch",
     layout="wide",
