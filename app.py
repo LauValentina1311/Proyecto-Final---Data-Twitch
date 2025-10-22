@@ -41,3 +41,14 @@ try:
 except FileNotFoundError:
     st.error("Error: Asegúrate de que el archivo 'twitch_streamers.csv' esté en la misma carpeta que 'app.py'.")
     st.stop()
+
+    #Creamos una Sidebar para la interacción dentro del Dashboard
+    st.sidebar.header("Filtros Globales")
+    selected_language = st.sidebar.multiselect(
+        "Seleccionar Idioma(s) para el Análisis Detallado",
+        options=data_limpia['LANGUAGE'].unique(),
+        default=["English", "Spanish"]
+    )
+
+    #Filtro general aplicado al DataFrame
+    df_filtered_lang = data_limpia[data_limpia['LANGUAGE'].isin(selected_language)]
