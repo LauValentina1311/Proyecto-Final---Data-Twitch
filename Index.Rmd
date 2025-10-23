@@ -182,7 +182,7 @@ plotly_grafico2 <- ggplot(followers_region, aes(x = reorder(NAME, TOTAL_FOLLOWER
 ggplotly(plotly_grafico2, tooltip = "text")
 ```
 
-**Análisis:** En la Tabla 2, observamos que el streamer con **más seguidores en la comunidad angloparlante es ninja, con un total de 19,000,000 seguidores.** Le sigue **Auronplay, en la comunidad hispanohablante con 16,300,000 seguidores.** La presencia de otros streamers como Rubius y Ibai en el top 5 hispanohablante indica una fuerte competencia y diversidad en esta región. pipipip
+**Análisis:** En la Tabla 2, observamos que el streamer con **más seguidores en la comunidad angloparlante es ninja, con un total de 19,000,000 seguidores.** Le sigue **Auronplay, en la comunidad hispanohablante con 16,300,000 seguidores.** La presencia de otros streamers como Rubius y Ibai en el top 5 hispanohablante indica una fuerte competencia y diversidad en esta región.
 
 ### 6.2 Top streamers por views y región
 
