@@ -1,0 +1,10 @@
+name: "analisis-twitch-streamers"
+output_dir: "docs" # Directorio de publicación para Render.
+navbar:
+  title: "Analisis Twitch"
+  left:
+    - text: "Informe Principal"
+      href: index.html
+output: html_document:
+   html_document: 
+     theme: flatly
