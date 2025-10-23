@@ -189,3 +189,47 @@ def main():
                 """)
             else:
                 st.warning("Selecciona al menos un idioma en la barra lateral para ver este análisis.")
+
+                #6.3 Top 5 Streamers por Juego más Streameado
+                st.subheader("6.3 Top 5 Streamers por Juego más Streameado y Región")
+
+                if not df_filtered_lang.empty:
+                    #Se obtienen los top 5 de cada idioma basado en TOTAL_FOLLOWERS
+                    juego_region = df_filtered_lang.sort_values(['LANGUAGE', 'TOTAL_FOLLOWERS'],
+                                                                ascending=[True, False]).groupby('LANGUAGE').head(
+                        5).reset_index(drop=True)
+
+                    #Añadimos la columna de Rank
+                    juego_region['RANK_POR_IDIOMA'] = juego_region.groupby('LANGUAGE').cumcount() + 1
+
+                    juego_region_display = juego_region[
+                        ['RANK_POR_IDIOMA', 'LANGUAGE', 'NAME', 'MOST_STREAMED_GAME', 'TOTAL_FOLLOWERS']]
+
+                    st.markdown("### Tabla 4: Top 5 Streamers por Juego Más Streameado y Seguidores")
+                    st.dataframe(juego_region_display.style.format({'TOTAL_FOLLOWERS': '{:,.0f}'}),
+                                 use_container_width=True)
+
+                    #Gráfico de barras
+                    #Combinamos NAME y LANGUAGE para una mejor visualización del ranking
+                    juego_region['DISPLAY_NAME'] = juego_region['NAME'] + " (" + juego_region['LANGUAGE'] + " - Rank " + \
+                                                   juego_region['RANK_POR_IDIOMA'].astype(str) + ")"
+
+                    fig_juego = px.bar(
+                        juego_region.sort_values(by='TOTAL_FOLLOWERS', ascending=True),
+                        x='TOTAL_FOLLOWERS',
+                        y='DISPLAY_NAME',
+                        color='MOST_STREAMED_GAME',
+                        orientation='h',
+                        title="Top 5 Streamers por Juego Más Streameado",
+                        labels={'TOTAL_FOLLOWERS': 'Total de Followers', 'DISPLAY_NAME': 'Streamer y Región'},
+
+                        color_discrete_sequence=px.colors.qualitative.Bold
+                    )
+                    fig_juego.update_layout(xaxis_tickformat=',')
+                    st.plotly_chart(fig_juego, use_container_width=True)
+
+                    st.markdown("""
+                    **Análisis:** La visualización interactiva confirma las tendencias. Por ejemplo, **Just Chatting** es una categoría clave en ambas comunidades. Puede interactuar con la leyenda de Plotly (haciendo clic en los juegos) para ver el impacto de cada categoría.
+                    """)
+                else:
+                    st.warning("Selecciona al menos un idioma en la barra lateral para ver este análisis.")
