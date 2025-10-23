@@ -36,61 +36,74 @@ def load_and_clean_data(file_path):
 
 
 # Cargar los datos limpios
-try:
-    data_limpia = load_and_clean_data("twitch_streamers.csv")
-except FileNotFoundError:
-    st.error("Error: Asegúrate de que el archivo 'twitch_streamers.csv' esté en la misma carpeta que 'app.py'.")
-    st.stop()
+def main():
+    try:
+        data_limpia = load_and_clean_data("twitch_streamers.csv")
+    except FileNotFoundError:
+        st.error("Error: Asegúrate de que el archivo 'twitch_streamers.csv' esté en la misma carpeta que 'app.py'.")
+        st.stop()
 
-    #Generamos una Sidebar para la interacción dentro del Dashboard
-    st.sidebar.header("Filtros Globales")
-    selected_language = st.sidebar.multiselect(
-        "Seleccionar Idioma(s) para el Análisis Detallado",
-        options=data_limpia['LANGUAGE'].unique(),
-        default=["English", "Spanish"]
-    )
+        #Generamos una Sidebar para la interacción dentro del Dashboard
+        st.sidebar.header("Filtros Globales")
+        selected_language = st.sidebar.multiselect(
+            "Seleccionar Idioma(s) para el Análisis Detallado",
+            options=data_limpia['LANGUAGE'].unique(),
+            default=["English", "Spanish"]
+        )
 
-    #Filtro general aplicado al DataFrame
-    df_filtered_lang = data_limpia[data_limpia['LANGUAGE'].isin(selected_language)]
+        #Filtro general aplicado al DataFrame
+        df_filtered_lang = data_limpia[data_limpia['LANGUAGE'].isin(selected_language)]
 
-#Layout del Dashboard
+        # --- Layout del Dashboard ---
+        st.title("📊 Análisis Comparativo del Rendimiento de los Streamers de Twitch")
+        st.markdown("---")
 
-st.title("📊 Análisis Comparativo del Rendimiento de los Streamers de Twitch")
-st.markdown("---")
+        #CONTENIDO DEL DASHBOARD
+
+        #Verificación de datos
+        if not df_filtered_lang.empty:
+
+            #Análisis General de los Streamers
+            st.header("5. Análisis General de los Streamers")
+
+            #5.1 Conteo de Streamers por Región
+            st.subheader("Conteo y Distribución General de Streamers")
+
+            #Agrupación y conteo
+            #Usamos data_limpia para el análisis general
+            streamers_count = data_limpia['LANGUAGE'].value_counts().reset_index()
+            streamers_count.columns = ['LANGUAGE', 'Número de Streamers']
+
+            col1, col2 = st.columns([1, 2])
+
+            with col1:
+                st.markdown("### Tabla 1: Conteo de Streamers por Región")
+                #Reemplazamos use_container_width=True por width='stretch'
+                st.dataframe(streamers_count, width='stretch')
+                st.markdown(f"""
+                    **Análisis:** Se confirma el dominio de la comunidad **angloparlante (Inglés)** con **{streamers_count.iloc[0, 1]:,} streamers**. El español se posiciona como la tercera lengua más popular.
+                    """)
+
+            with col2:
+                #Gráfico de barras
+                fig_distribucion = px.bar(
+                    streamers_count.sort_values(by='Número de Streamers', ascending=True),
+                    x='Número de Streamers',
+                    y='LANGUAGE',
+                    orientation='h',
+                    title="Distribución de Streamers por Región (Top 10)",
+                    color_discrete_sequence=[PRIMARY_COLOR]
+                )
+                fig_distribucion.update_layout(yaxis={'title': 'Región'})
+                #Reemplazamos use_container_width=True por width='stretch'
+                st.plotly_chart(fig_distribucion, width='stretch')
+
+            st.markdown("---")
+
+        else:
+
+            st.warning("Por favor, selecciona al menos un idioma en la barra lateral para ver el análisis detallado.")
 
 
-#Análisis General de los Streamers
-
-st.header("5. Análisis General de los Streamers")
-
-#5.1 Conteo de Streamers por Región
-st.subheader("Conteo y Distribución General de Streamers")
-
-#Agrupación y conteo
-streamers_count = data_limpia['LANGUAGE'].value_counts().reset_index()
-streamers_count.columns = ['LANGUAGE', 'Número de Streamers']
-
-col1, col2 = st.columns([1, 2])
-
-with col1:
-    st.markdown("### Tabla 1: Conteo de Streamers por Región")
-    #Muestra el resultado como tabla interactiva
-    st.dataframe(streamers_count, use_container_width=True)
-    st.markdown(f"""
-    **Análisis:** Se confirma el dominio de la comunidad **angloparlante (Inglés)** con **{streamers_count.iloc[0, 1]:,} streamers**. El español se posiciona como la tercera lengua más popular.
-    """)
-
-with col2:
-    #Gráfico de barras
-    fig_distribucion = px.bar(
-        streamers_count.sort_values(by='Número de Streamers', ascending=True),
-        x='Número de Streamers',
-        y='LANGUAGE',
-        orientation='h',
-        title="Distribución de Streamers por Región (Top 10)",
-        color_discrete_sequence=[PRIMARY_COLOR]
-    )
-    fig_distribucion.update_layout(yaxis={'title': 'Región'})
-    st.plotly_chart(fig_distribucion, use_container_width=True)
-
-st.markdown("---")
+    if __name__ == "__main__":
+        main()
