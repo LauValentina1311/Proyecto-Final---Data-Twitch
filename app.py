@@ -91,7 +91,7 @@ def main():
     if not df_filtered_lang.empty:
 
         # 5. Análisis General de los Streamers
-        st.header("5. Análisis General de los Streamers")
+        st.header("Análisis General de los Streamers")
 
         # 5.1 Conteo de Streamers por Región
         st.subheader("Conteo y Distribución General de Streamers")
@@ -130,10 +130,10 @@ def main():
 
         # --- 4. CONTENIDO DEL DASHBOARD: SECCIÓN 6 (Análisis Detallado) ---
 
-        st.header("6. Distribución de Categorías de Contenido por Región/Streamers")
+        st.header("Distribución de Categorías de Contenido por Región/Streamers")
 
         # 6.1 Top 5 Streamers por Followers
-        st.subheader("6.1 Top 5 Streamers por Followers y Región")
+        st.subheader("Top 5 Streamers por Followers y Región")
 
         followers_region = df_filtered_lang.groupby(['LANGUAGE', 'NAME']).agg(
             TOTAL_FOLLOWERS=('TOTAL_FOLLOWERS', 'sum')
@@ -179,7 +179,7 @@ def main():
 
         # 6.2 Top 5 Streamers por Views
 
-        st.subheader("6.2 Top 5 Streamers por Views y Región")
+        st.subheader("Top 5 Streamers por Views y Región")
 
         # Agrupación por media de views
         views_region = df_filtered_lang.groupby(['LANGUAGE', 'NAME']).agg(
@@ -224,7 +224,7 @@ def main():
         st.markdown(analysis_text_views)
 
         # 6.3 Top 5 Streamers por Juego más Streameado
-        st.subheader("6.3 Top 5 Streamers por Juego más Streameado y Región")
+        st.subheader("Top 5 Streamers por Juego más Streameado y Región")
 
         # Se obtienen los top 5 de cada idioma basado en TOTAL_FOLLOWERS
         juego_region = df_filtered_lang.sort_values(['LANGUAGE', 'TOTAL_FOLLOWERS'],
