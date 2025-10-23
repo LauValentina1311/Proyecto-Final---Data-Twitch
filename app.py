@@ -150,3 +150,42 @@ def main():
             """)
         else:
             st.warning("Selecciona al menos un idioma en la barra lateral para ver este análisis.")
+
+            #6.2 Top 5 Streamers por Views
+
+            st.subheader("6.2 Top 5 Streamers por Views y Región")
+
+            if not df_filtered_lang.empty:
+                #Agrupación por media de views
+                views_region = df_filtered_lang.groupby(['LANGUAGE', 'NAME']).agg(
+                    TOTAL_VIEWS=('TOTAL_VIEWS', 'mean')
+                ).reset_index()
+
+                #Obtener el top 5 por idioma
+                top_views = views_region.loc[
+                    views_region.groupby('LANGUAGE')['TOTAL_VIEWS'].nlargest(5).index.get_level_values(1)].sort_values(
+                    by=['LANGUAGE', 'TOTAL_VIEWS'], ascending=[True, False]
+                ).reset_index(drop=True)
+
+                st.markdown("### Tabla 3: Top 5 Streamers por Views y Región (Media)")
+                st.dataframe(top_views.style.format({'TOTAL_VIEWS': '{:,.0f}'}), use_container_width=True)
+
+                #Gráfico de barras 
+                fig_views = px.bar(
+                    top_views.sort_values(by='TOTAL_VIEWS', ascending=True),
+                    x='TOTAL_VIEWS',
+                    y='NAME',
+                    color='LANGUAGE',
+                    orientation='h',
+                    title="Top 5 Streamers por Views y Región",
+                    labels={'TOTAL_VIEWS': 'Total de Views (Media)'},
+                    color_discrete_map={'English': PALETTE_COLOURS[0], 'Spanish': PALETTE_COLOURS[1]}
+                )
+                fig_views.update_layout(xaxis_tickformat=',')
+                st.plotly_chart(fig_views, use_container_width=True)
+
+                st.markdown(f"""
+                **Análisis:** El streamer con más *views* de la comunidad angloparlante es **{top_views[top_views['LANGUAGE'] == 'English'].iloc[0]['NAME']}** (con una media de {top_views[top_views['LANGUAGE'] == 'English'].iloc[0]['TOTAL_VIEWS']:,.0f} views). El streamer hispanohablante más visto es **{top_views[top_views['LANGUAGE'] == 'Spanish'].iloc[0]['NAME']}** (con una media de {top_views[top_views['LANGUAGE'] == 'Spanish'].iloc[0]['TOTAL_VIEWS']:,.0f} views).
+                """)
+            else:
+                st.warning("Selecciona al menos un idioma en la barra lateral para ver este análisis.")
