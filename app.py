@@ -107,3 +107,46 @@ def main():
 
     if __name__ == "__main__":
         main()
+
+        #Distribución de Categorías de Contenido por Región
+
+        st.header("6. Distribución de Categorías de Contenido por Región/Streamers")
+
+        #6.1 Top 5 Streamers por Followers
+
+        st.subheader("6.1 Top 5 Streamers por Followers y Región")
+        if not df_filtered_lang.empty:
+            followers_region = df_filtered_lang.groupby(['LANGUAGE', 'NAME']).agg(
+                TOTAL_FOLLOWERS=('TOTAL_FOLLOWERS', 'sum')
+            ).reset_index()
+
+            #Obtener el top 5 por idioma
+            top_followers = followers_region.loc[
+                followers_region.groupby('LANGUAGE')['TOTAL_FOLLOWERS'].nlargest(5).index.get_level_values(
+                    1)].sort_values(
+                by=['LANGUAGE', 'TOTAL_FOLLOWERS'], ascending=[True, False]
+            ).reset_index(drop=True)
+
+            st.markdown("### Tabla 2: Top 5 Streamers por Followers y Región")
+            #Muestra la tabla de seguidores
+            st.dataframe(top_followers.style.format({'TOTAL_FOLLOWERS': '{:,.0f}'}), use_container_width=True)
+
+            #Gráfico de barras
+            fig_followers = px.bar(
+                top_followers.sort_values(by='TOTAL_FOLLOWERS', ascending=True),
+                x='TOTAL_FOLLOWERS',
+                y='NAME',
+                color='LANGUAGE',
+                orientation='h',
+                title="Top 5 Streamers por Followers y Región",
+                labels={'TOTAL_FOLLOWERS': 'Total de Followers'},
+                color_discrete_map={'English': PALETTE_COLOURS[0], 'Spanish': PALETTE_COLOURS[1]}
+            )
+            fig_followers.update_layout(xaxis_tickformat=',')
+            st.plotly_chart(fig_followers, use_container_width=True)
+
+            st.markdown(f"""
+            **Análisis:** El streamer con más seguidores en la comunidad angloparlante es **{top_followers[top_followers['LANGUAGE'] == 'English'].iloc[0]['NAME']}** (con {top_followers[top_followers['LANGUAGE'] == 'English'].iloc[0]['TOTAL_FOLLOWERS']:,.0f} seguidores). El streamer hispanohablante más popular es **{top_followers[top_followers['LANGUAGE'] == 'Spanish'].iloc[0]['NAME']}** (con {top_followers[top_followers['LANGUAGE'] == 'Spanish'].iloc[0]['TOTAL_FOLLOWERS']:,.0f} seguidores).
+            """)
+        else:
+            st.warning("Selecciona al menos un idioma en la barra lateral para ver este análisis.")
